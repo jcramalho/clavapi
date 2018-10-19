@@ -1,0 +1,105 @@
+﻿extends layout
+block corpo
+    .col-lg-12
+        #acordeao
+            accordion(type="info-custom")
+                panel( header="O que é a CLAV")
+                    p É uma Plataforma que visa:
+                    ol(type="a")
+                        li Disponibilizar a “Lista Consolidada para a classificação e avaliação da informação pública” enquanto instrumento facilitador da elaboração dos planos de classificação e tabelas de seleção da Administração Pública, de empresas públicas e de outras entidades;
+                        li Possibilitar a submissão de propostas ou atualizações de planos de classificação e tabelas de seleção;
+                        li Desmaterializar os procedimentos de controlo da eliminação da informação arquivística através da recolha e análise de autos de eliminação;
+                        li Disponibilizar ferramentas para a elaboração e submissão de planos de preservação digital e planos de substituição de suporte.
+
+                    p As funcionalidades disponibilizadas em julho de 2018 são as seguintes: 
+                    ol.list_parentheses
+                        li Consulta da Lista Consolidada – Processos de Negócio;
+                        li Consulta de Entidades;
+                        li Consulta de Legislação;
+                        li Consulta de Termos de Índice (associados a cada Processo de Negócio);
+                        li Disponibilização de links para Documentação Técnica de Apoio; 
+                        li Disponibilização de Notícias relevantes relacionadas com a classificação e avaliação da informação arquivística. 
+                        
+                    p Em breve, estarão acessíveis novas funcionalidades.
+                    p A Plataforma CLAV tem o apoio do Sistema de Apoios à Modernização Administrativa (SAMA).
+    
+    .col-lg-6
+        table#navegacao.table.tabela-navegacao
+            tr 
+                td
+                    .labelbox(style="width:20%")
+                        | Consulte:
+            
+            tr
+                td(style="padding-left:50px !important")
+                    accordion(type="linkbox")
+                        panel(v-for="(linha,index) in linhas" :header="linha.valor" :key="index")
+                            div(v-if="linha.text" v-html="linha.text")
+                            
+                            if user
+                                a(:href="linha.consultar" v-if="linha.consultar")
+                                    button(v-if="!linha.newCons") Consultar
+                                    button(v-else) {{linha.newCons}}
+                                
+                                a(:href="linha.consultarAuth" v-else)
+                                    button(v-if="!linha.newCons") Consultar
+                                    button(v-else) {{linha.newCons}}
+                                
+                                a(v-if="linha.submeter" :href="linha.submeter" style="margin-left:9px")
+                                    button(v-if="!linha.newSub") Submeter
+                                    button(v-else) {{linha.newSub}}
+                            else
+                                p {{linha.notlogged}}
+                                a(:href="linha.consultar" v-if="linha.consultar")
+                                    button Consultar
+            tr 
+                td(style="padding-top:15px !important")
+                    .labelbox
+                        | Documentação Técnica de Apoio
+                    
+                    accordion(type="noticiabox")
+                        panel(header="Documentos metodológicos")
+                            p Para conhecer os princípios teóricos e metodológicos que estão na base da Lista Consolidada, veja os seguintes documentos técnicos:
+                            ul
+                                li 
+                                    a(href="http://arquivos.dglab.gov.pt/wp-content/uploads/sites/16/2013/10/egov_interoperabilidade.pdf") Governo Electrónico e Interoperabilidade: documento metodológico para a elaboração de um esquema de metainformação para a interoperabilidade e de uma macroestrutura funcional
+                                li 
+                                    a(href="http://arquivos.dglab.gov.pt/wp-content/uploads/sites/16/2014/02/2013_Orient-3-niveis_PC-MF.pdf") Orientações básicas para o desenvolvimento dos 3ºs níveis em planos de classificação conformes à macroestrutura funcional
+                                li 
+                                    a(href="http://arquivos.dglab.gov.pt/wp-content/uploads/sites/16/2016/03/ASIA_Doc-metodologico2016-03-10.pdf") Avaliação suprainstitucional da Informação arquivística (ASIA): Documento metodológico.
+                                    p Contém, em anexo, as Regras para a criação de termos do índice.
+
+    .col-lg-1
+    .col-lg-5
+        table.table.tabela-navegacao
+            tr
+                td(colspan="2")
+                    .labelbox
+                        | Entidades:
+            tr
+                td(style="padding-left:50px !important")
+                    a(href="/organizacoes/registo_entidade")
+                        .linkbox(style="margin-bottom:0px")
+                            | Identificação de Representantes
+            tr
+                td(style="padding-left:50px !important")
+                    a(href="/gestao/pedidos")
+                        .linkbox(style="margin-bottom:0px")
+                            | Área de Trabalho
+        
+        table#noticias.table.tabela-navegacao
+            tr 
+                td
+                    .labelbox(style="with:100%")
+                        | Notícias:
+            tr
+                td
+                    accordion(type="noticiabox")
+                        panel(v-for="(not,index) in noticias" :header="not.title" :key="index")
+                            small {{ not.date }}
+                            div(v-html="not.body")
+                            
+            
+
+append scripts
+    script(src="/javascripts/index.vue")

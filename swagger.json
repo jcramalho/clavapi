@@ -1,0 +1,642 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Esta é a API do projeto CLAV.  Pode encontrar mais informação sobre o CLAV em [http://clav.dglab.gov.pt](http://clav.dglab.gov.pt). Por motivos de segurança, toda a informação é devolvida em JSONP. Num futuro próximo serão disponibilizados resultados noutros formatos textuais como XML e CSV.",
+    "version": "1.0.0",
+    "title": "CLAV API",
+    "contact": {
+      "name": "CLAV",
+      "email": "clav@dglab.gov.pt"
+    },
+    "license": {
+      "name": "Licença Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host": "localhost:8000",
+  "basePath": "/api",
+  "tags": [
+    {
+      "name": "Classe",
+      "description": "Operações disponíveis sobre classes: niveis 1, 2, 3 e 4"
+    },
+    {
+      "name": "Entidade",
+      "description": "Operações disponíveis sobre entidades"
+    },
+    {
+      "name": "Tipologia",
+      "description": "Operações disponíveis sobre tipologias de entidades"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/classes": {
+      "get": {
+        "tags": [
+          "Classe"
+        ],
+        "summary": "Devolve a lista de classes de nível 1",
+        "description": "Devolve a lista de classes de nível 1",
+        "produces": [
+          "application/javascript"
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de entidades",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Entidade"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/classes/nivel/{n}": {
+      "get": {
+        "tags": [
+          "Classe"
+        ],
+        "summary": "Devolve a lista de classes de nível n",
+        "description": "Devolve a lista de classes de nível n",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "n",
+            "in": "path",
+            "required": true,
+            "description": "O nível do qual se pretende obter a lista de classes",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/classes/{id}": {
+      "get": {
+        "tags": [
+          "Classe"
+        ],
+        "summary": "Devolve a metainformação de uma classe",
+        "description": "Dado o id de uma classe devolve a sua informação base",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da classe",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/classes/{id}/descendencia": {
+      "get": {
+        "tags": [
+          "Classe"
+        ],
+        "summary": "Devolve a identificação dos filhos de uma classe",
+        "description": "Dado o id de uma classe devolve a lista com a identificação dos filhos e, para cada um deles, quantos filhos tem",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da classe",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/classes/{id}/notasAp": {
+      "get": {
+        "tags": [
+          "Classe"
+        ],
+        "summary": "Devolve a lista de notas de aplicação de uma classe - [idNota, nota]",
+        "description": "Dado o id de uma classe devolve a lista das suas notas de aplicação",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da classe",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/classes/{id}/exemplosNotasAp": {
+      "get": {
+        "tags": [
+          "Classe"
+        ],
+        "summary": "Devolve a lista de exemplos das notas de aplicação de uma classe - [exemplo]",
+        "description": "Dado o id de uma classe devolve a lista de exemplos das suas notas de aplicação",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da classe",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/classes/{id}/notasEx": {
+      "get": {
+        "tags": [
+          "Classe"
+        ],
+        "summary": "Devolve a lista de notas de exclusão de uma classe - [idNota, nota]",
+        "description": "Dado o id de uma classe devolve a lista das suas notas de exclusão",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da classe",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/classes/{id}/ti": {
+      "get": {
+        "tags": [
+          "Classe"
+        ],
+        "summary": "Devolve a lista dos termos de índice de uma classe - [idTI, termo]",
+        "description": "Dado o id de uma classe devolve a lista dos seus termos de índice",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da classe",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/entidades": {
+      "get": {
+        "tags": [
+          "Entidade"
+        ],
+        "summary": "Lista as entidades registadas",
+        "produces": [
+          "application/javascript"
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de entidades",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Entidade"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/entidades/{id}": {
+      "get": {
+        "tags": [
+          "Entidade"
+        ],
+        "summary": "Devolve a metainformação de uma entidade",
+        "description": "Dado o id de uma entidade devolve a sua informação base",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da entidade",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/entidades/{id}/tipologias": {
+      "get": {
+        "tags": [
+          "Entidade"
+        ],
+        "summary": "Devolve as tipologias a que uma entidade pertence",
+        "description": "Dado o id de uma entidade devolve as tipologias a que pertence",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da entidade",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/entidades/{id}/intervencao/participante": {
+      "get": {
+        "tags": [
+          "Entidade"
+        ],
+        "summary": "Devolve a lista de intervenções da entidade em processos de negócio",
+        "description": "Dado o id de uma entidade devolve a lista de intervenções da entidade em processos de negócio",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da entidade",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/entidades/{id}/intervencao/dono": {
+      "get": {
+        "tags": [
+          "Entidade"
+        ],
+        "summary": "Devolve a lista de processos de negócio em que a entidade intervem como dono",
+        "description": "Dado o id de uma entidade devolve a lista de processos de negócio em que a entidade intervem como dono",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da entidade",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/tipologias": {
+      "get": {
+        "tags": [
+          "Tipologia"
+        ],
+        "summary": "Lista as tipologias registadas",
+        "produces": [
+          "application/javascript"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/tipologias/{id}": {
+      "get": {
+        "tags": [
+          "Tipologia"
+        ],
+        "summary": "Devolve a metainformação de uma tipologia",
+        "description": "Dado o id de uma tipologia devolve a sua informação base",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da tipologia",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/tipologias/{id}/elementos": {
+      "get": {
+        "tags": [
+          "Tipologia"
+        ],
+        "summary": "Devolve a lista de elementos pertencentes a uma tipologia",
+        "description": "Dado o id de uma tipologia devolve a lista dos seus membros",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da tipologia",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/tipologias/{id}/intervencao/dono": {
+      "get": {
+        "tags": [
+          "Tipologia"
+        ],
+        "summary": "Devolve a lista de processos em que a tipologia intervem como dono",
+        "description": "Dado o id de uma tipologia devolve a lista de processos em que a mesma intervem como dono",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da tipologia",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    },
+    "/tipologias/{id}/intervencao/participante": {
+      "get": {
+        "tags": [
+          "Tipologia"
+        ],
+        "summary": "Devolve a lista de processos em que a tipologia intervem como participante",
+        "description": "Dado o id de uma tipologia devolve a lista de processos em que a mesma intervem como participante",
+        "produces": [
+          "application/javascript"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id da tipologia",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Resposta200"
+          },
+          "400": {
+            "$ref": "#/responses/RespostaErro400"
+          },
+          "500": {
+            "$ref": "#/responses/RespostaErro500"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Entidade": {
+      "type": "object",
+      "required": [
+        "sigla",
+        "designação"
+      ],
+      "properties": {
+        "sigla": {
+          "type": "string",
+          "example": "AP"
+        },
+        "designação": {
+          "type": "string",
+          "example": "Administração Pública"
+        }
+      }
+    },
+    "Erro": {
+      "properties": {
+        "cod": {
+          "type": "string"
+        },
+        "mensagem": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "responses": {
+    "Resposta200": {
+      "description": "Operação bem sucedida."
+    },
+    "RespostaErro400": {
+      "description": "Erro inesperado no cliente.",
+      "schema": {
+        "$ref": "#/definitions/Erro"
+      }
+    },
+    "RespostaErro500": {
+      "description": "Ocorreu um erro inesperado no servidor.",
+      "schema": {
+        "$ref": "#/definitions/Erro"
+      }
+    }
+  }
+}

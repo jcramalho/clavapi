@@ -1,0 +1,73 @@
+extends ../layout
+block corpo
+    #organizacao-form.panel.panel-default.panel-custom
+        .panel-heading
+            h1.page-header
+                div {{ entName }}
+                    if user
+                        a(:href="'/tipologias/editar/'+id" style="float:right")  
+                            span.glyphicon.glyphicon-edit
+        .panel-body
+            .form-group
+                table.consulta
+                    //- NOME
+                    tr
+                        td(style="width:10%")
+                            label Nome: 
+                        td(style="width:80%")
+                            | {{ entName }}  
+                    
+                    //- SIGLA
+                    tr
+                        td(style="width:10%")
+                            label Sigla: 
+                        td(style="width:80%")
+                            | {{ entInitials }} 
+                    
+                    //- DOMINIO
+                    tr
+                        td(style="width:10%")
+                            label Dono de:
+                        td(style="width:80%")
+                            ul(v-if="domainReady" style="padding-left:20px" :class="{'is-collapsed' : domainCollapsed }")
+                                li(v-for="c in domain")
+                                    a(:href="'/classes/consultar/'+c.id") {{ c.Code }}
+                                    |  - {{ c.Title }}
+                            a(@click="domainCollapsed=!domainCollapsed" v-if="domain.length>6").maozinha
+                                span(v-if="domainCollapsed") Mostrar mais...
+                                span(v-else) Mostrar menos...
+                        
+                    //- PARTICIPAÇÕES
+                    tr
+                        td(style="width:10%")
+                            label Tipo de Participação:    
+                        td(style="width:80%")
+                            ul(v-if="partsReady" style="padding-left:20px")
+                                li(v-for="key in Object.keys(participations)" v-if="participations[key].length>0")
+                                    b  {{ participationsDic[key] }}:
+                                    ul(:class="{'is-collapsed' : partsCollapsed[key] }")
+                                        li(v-for="p in participations[key]")
+                                            a(:href="'/classes/consultar/'+p.id") {{ p.Code }}
+                                            |  - {{ p.Title }}
+                                    a(@click="partsCollapsed[key]=!partsCollapsed[key]" v-if="participations[key].length>6").maozinha
+                                        span(v-if="partsCollapsed[key]") Mostrar mais...
+                                        span(v-else) Mostrar menos...
+                        
+                    //- ELEMENTOS
+                    tr(v-if="type!='Tipologia'")
+                        td(style="width:10%")
+                            label Elementos:
+                        td(style="width:80%")
+                            ul(style="padding-left:20px")
+                                li(v-for="e in myElems")
+                                    a(:href="'/entidades/consultar/'+e.id") {{ e.Sigla }} 
+                                    | - {{ e.Designacao }}
+            
+            if user
+                a(:href="'/tipologias/editar/'+id").btn.btn-xs.btn-default.col-sm-1
+                    | Editar
+                        
+    //-
+
+append scripts    
+    script(src="/javascripts/tipologias/consulta.vue")

@@ -1,0 +1,283 @@
+extends ../layout
+block corpo
+    #legislacao-form.panel.panel-default.panel-custom
+        .panel-heading
+            h1.page-header {{ legData.type.original }} {{ legData.number.original }}
+        .panel-body
+            .form-group
+                table(v-if="ready").consulta
+
+                    //- TÍTULO
+                    tr
+                        td(style="width:12%")
+                            .info-label {{ legData.title.label }}:
+                        td(v-if="legData.title.edit" style="width:80%")
+                            input(
+                                size="50"
+                                v-model="legData.title.new"
+                                :placeholder="legData.title.original"
+                            )
+                        td(v-else style="width:80%")
+                            | {{ legData.title.original }}
+
+                        if user
+                            td
+                                label(
+                                    for="legData.title.edit"
+                                    :class="[legData.title.edit ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                )
+                                input(
+                                    id="legData.title.edit"
+                                    type="checkbox"
+                                    v-model="legData.title.edit"
+                                    class="drop-row"
+                                )
+
+
+                    //- Tipo
+                    tr
+                        td(style="width:12%")
+                            .info-label {{ legData.type.label }}:
+                        td(v-if="legData.type.edit" style="width:80%")
+                            input(
+                                size="50"
+                                v-model="legData.type.new"
+                                :placeholder="legData.type.original"
+                            )
+                        td(v-else style="width:80%")
+                            | {{ legData.type.original }}
+
+                        if user
+                            td
+                                label(
+                                    for="legData.type.edit"
+                                    :class="[legData.type.edit ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                )
+                                input(
+                                    id="legData.type.edit"
+                                    type="checkbox"
+                                    v-model="legData.type.edit"
+                                    class="drop-row"
+                                )
+
+                    //- Número
+                    tr
+                        td(style="width:12%")
+                            .info-label {{ legData.number.label }}:
+                        td(v-if="legData.number.edit" style="width:80%")
+                            input(
+                                size="50"
+                                v-model="legData.number.new"
+                                :placeholder="legData.number.original"
+                            )
+                        td(v-else style="width:80%")
+                            | {{ legData.number.original }}
+
+                        if user
+                            td
+                                label(
+                                    for="legData.number.edit"
+                                    :class="[legData.number.edit ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                )
+                                input(
+                                    id="legData.number.edit"
+                                    type="checkbox"
+                                    v-model="legData.number.edit"
+                                    class="drop-row"
+                                )
+
+                    //- Entidades
+                    tr
+                        td(style="width:12%")
+                            .info-label Entidade(s):
+                        td(v-if="legData.org.edit" style="width:80%")
+                            custom-table-select(
+                                v-if="orgsReady"
+
+                                :header="orgsTableHeader"
+                                :complete-rows="orgs"
+                                :ready="orgsReady"
+                                :cwidth="orgsTableWidth"
+                                
+                                class-table='table table-condensed'
+
+                                @select-clicked="orgSelected($event,legData.org.new)"
+                            )
+                            h4(
+                                v-else
+                            ) A carregar...
+                        td(v-else style="width:80%")
+                            ul
+                                li(v-for="org in legData.org.original")
+                                    a(:href="'/organizacoes/consultar/'+org.id") {{org.sigla}}
+                                    |  - {{org.nome}}
+
+                        if user
+                            td
+                                label(
+                                    for="legData.org.edit"
+                                    :class="[legData.org.edit ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                )
+                                input(
+                                    id="legData.org.edit"
+                                    type="checkbox"
+                                    v-model="legData.org.edit"
+                                    class="drop-row"
+                                )
+
+                    //- Data
+                    tr
+                        td(style="width:12%")
+                            .info-label {{ legData.date.label }}:
+                        td(v-if="legData.date.edit" style="width:80%") 
+                            datepicker(
+                                value=""
+                                @input="dateChosen($event)"
+                                format="dd/MM/yyyy"
+                                :placeholder="legData.date.original"
+                            )
+                        td(v-else style="width:80%")
+                            | {{ legData.date.original }}
+
+                        if user
+                            td
+                                label(
+                                    for="legData.date.edit"
+                                    :class="[legData.date.edit ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                )
+                                input(
+                                    id="legData.date.edit"
+                                    type="checkbox"
+                                    v-model="legData.date.edit"
+                                    class="drop-row"
+                                )
+
+                    //- Link
+                    tr
+                        td(style="width:12%")
+                            .info-label {{ legData.link.label }}:
+                        td(v-if="legData.link.edit" style="width:80%")
+                            input(
+                                size="50"
+                                v-model="legData.link.new"
+                                :placeholder="legData.link.original"
+                            )
+                        td(v-else style="width:80%")
+                            a(:href="legData.link.original" target="_blank") Ficheiro
+
+                        if user
+                            td
+                                label(
+                                    for="legData.link.edit"
+                                    :class="[legData.link.edit ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                )
+                                input(
+                                    id="legData.link.edit"
+                                    type="checkbox"
+                                    v-model="legData.link.edit"
+                                    class="drop-row"
+                                )
+
+                    //- PROCESSOS
+                    tr
+                        td(style="width:10%")
+                            .info-label Processos Regulamentados:
+                        td(style="width:80%")
+                            ul(v-if="processesReady" style="padding-left:20px" :class="{'is-collapsed' : processesCollapsed }")
+                                li(v-for="c in processes")
+                                    a(:href="'/classes/consultar/'+c.id") {{ c.Code }}
+                                    |  - {{ c.Title }}
+                            a(@click="processesCollapsed=!processesCollapsed" v-if="processes.length>6").maozinha
+                                span(v-if="processesCollapsed") Mostrar mais...
+                                span(v-else) Mostrar menos...
+                        //- edição
+                        //-td(v-if="editProcesses" style="width:80%")
+                            table
+                                tr
+                                    td(width="60%")
+                                        v-select.custom-select(
+                                            v-model="newProcess"
+                                            :options="classList"
+                                        )
+                                    td
+                                        button(
+                                            @click="newProcesses.unshift(newProcess.value)"
+                                        ) +
+                                tr(v-if="newProcesses.length")
+                                    td(colspan="2")
+                                        ul(style="padding-left:20px")
+                                            li(v-for="(c,index) in newProcesses")
+                                                | {{ c.Code }} - {{ c.Title }}
+                                                button(
+                                                    @click="newProcesses.splice(index,1)"
+                                                ) x
+                        //-td(style="width:10%")
+                            label(style="padding-right:5px") Editar (NYI)
+                            input(
+                                type="checkbox"
+                                v-model="editProcesses"
+                            )
+                h3(v-else) A carregar...
+
+            spinner(ref="spinner" fixed size="lg" text="Por favor aguarde...")
+
+            if user
+                input.btn.btn-xs.btn-default.col-sm-1(
+                    type="button"
+                    @click="update"
+                    value="Confirmar"
+                    :disabled="!(\
+                        legData.date.edit && legData.date.new ||\
+                        legData.number.edit && legData.number.new ||\
+                        legData.type.edit && legData.type.new ||\
+                        legData.title.edit && legData.title.new ||\
+                        legData.link.edit && legData.link.new ||\
+                        legData.org.edit\
+                    )"
+                )
+                input.btn.btn-xs.btn-warning.col-sm-1(
+                    type="button"
+                    @click="delConfirm=true"
+                    value="Apagar"
+                    :disabled="(\
+                        legData.date.edit && legData.date.new ||\
+                        legData.number.edit && legData.number.new ||\
+                        legData.type.edit && legData.type.new ||\
+                        legData.title.edit && legData.title.new ||\
+                        legData.link.edit && legData.link.new ||\
+                        legData.org.edit\
+                    )"
+                )
+                p.col-sm-5 {{ message }}
+
+                modal(
+                    title="Confirmar" 
+                    :value="delConfirm"
+                    @closed="delConfirm=false"
+
+                    small
+                ) 
+                    .modal-body(slot="modal-body")
+                        center Tem a certeza que deseja apagar?
+                    .modal-footer(slot="modal-footer")
+                        button(@click="deleteLeg" style="margin-right:7px") Ok
+                        button(@click="delConfirm=false") Cancelar
+
+            //-    input.btn.btn-xs.btn-danger(
+                    v-if="delConfirm"
+                    type="button"
+                    @click="deleteLeg"
+                    value="OK"
+                )
+                input.btn.btn-xs.btn-info(
+                    v-if="delConfirm"
+                    type="button"
+                    @click="delNotReady"
+                    value="<-"
+                )
+    //-
+
+
+
+append scripts
+    script(src="/javascripts/leg/edicao.vue")

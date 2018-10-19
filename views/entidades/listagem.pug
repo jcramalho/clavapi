@@ -1,0 +1,24 @@
+extends ../layout
+block corpo
+    h1.page-header Entidades
+    .row
+        #tabela-entidades.row.placeholders
+            custom-table-simple(
+                v-if="ready"
+
+                :header='["#","Designação","Sigla","Internacional"]'
+                :complete-rows="tableData"
+                :ready="ready"
+                :cwidth="['4%','75%','8%','13%']"
+                
+                class-table='table table-hover'
+
+                @row-clicked="rowClicked($event)"
+            )
+            h4(
+                v-else
+            ) A carregar...    
+    //-
+
+append scripts    
+    script(src="/javascripts/entidades/listagem.vue")

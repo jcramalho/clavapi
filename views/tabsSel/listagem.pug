@@ -1,0 +1,26 @@
+extends ../layout
+block corpo
+    h1.page-header Tabelas de Seleção
+    .row
+        #tabelas-selecao.row.placeholders
+            custom-table-simple(
+                v-if="ready"
+
+                :header="tableHeader"
+                :complete-rows="tableData"
+                :ready="ready"
+                :cwidth="cwidth"
+                
+                class-table='table table-hover'
+
+                @row-clicked="rowClicked($event)"
+                @add-clicked="addTab"
+            )
+            h4(
+                v-else
+            ) A carregar...  
+            
+    //-
+
+append scripts    
+    script(src="/javascripts/tabsSel/listagem.vue")

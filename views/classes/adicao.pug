@@ -1,0 +1,616 @@
+extends ../layout
+block lateral
+    ul#sidenav
+        li(v-for="l in nav")
+            a(:href="l.anchor") {{ l.label }}
+
+block corpo
+    #nova-classe-form.panel.panel-default.panel-custom
+        .panel-heading
+            h1.page-header Nova Classe  
+        .panel-body
+            .form-group
+                table.consulta(style="border-color: white; border-style:solid; margin-bottom:20px")
+                    
+                    //-TIPO/ NIVEL
+                    a(name="nivel")
+                    tr
+                        td(style="width:10%")
+                            .info-label Nível de classe: 
+                        td
+                            //select( v-model="type")
+                                option(value=1) Classe_N1
+                                option(value=2) Classe_N2
+                                option(value=3) Classe_N3
+                                option(value=4) Classe_N4
+                            table
+                                tr(style="border:none")
+                                    td(v-for="i in [1,2,3,4]" style="vertical-align:middle; padding-right:10px; padding-left:5px")
+                                        input(
+                                            :id="'n'+i"
+                                            type="radio"
+                                            :value="i"
+                                            v-model="type"
+                                        ) 
+                                        label(:for="'n'+i") Nível {{i}}
+
+                    //- CLASSE PAI
+                    a(name="pai")
+                    tr(v-if="type>1")
+                        td(style="width: 10%")
+                            .info-label Classe Pai: 
+                        td.smaller
+                            v-select.custom-select(
+                                v-if="parentsReady"
+                                style="width=100px"
+                                v-model="parentvalue"
+                                :options="parents"
+                            )
+
+                    //- CÓDIGO
+                    a(name="codigo")
+                    tr 
+                        td(style="width: 10%")
+                            .info-label Código: 
+                        td
+                            input(
+                                size="70"
+                                v-model="code"
+                            ) 
+                            p(style="color: red") {{ codeMessage }}
+
+                    //- TÍTULO
+                    a(name="titulo")
+                    tr
+                        td(style="width: 10%")
+                            .info-label Título: 
+                        td
+                            input(
+                                size="70"
+                                v-model="title"
+                            )
+
+                accordion.info-classe
+                    panel(header="Descritivo da Classe" is-open=true)
+                        table.consulta(style="border-color: white; border-style:solid")                
+
+                            //- DESCRIÇÃO
+                            a(name="descricao")
+                            tr
+                                td(style="width: 10%")
+                                    .info-label Descrição: 
+                                td
+                                    textarea(
+                                        cols="72"
+                                        lines="5"
+                                        v-model="description"
+                                    )
+
+                            //- NOTAS DE APLICAçÃO                        
+                            a(name="notasA")
+                            tr
+                                td(style="width: 10%")
+                                    .info-label Nota(s) de Aplicação:
+                                td
+                                    div(v-for="(note,index) in appNotes")
+                                        textarea(
+                                            cols="72"
+                                            lines="5"
+                                            v-model="appNotes[index].Note"
+                                        )
+                                        span.glyphicon.glyphicon-remove(
+                                            @click="appNotes.splice(index,1)"
+                                            style="padding-left: 5px; vertical-align:top"
+                                        )
+                                    
+                                    button(
+                                        style="margin-bottom:10px"
+                                        @click="appNotes.push({id:'',Note:''})"
+                                    )
+                                        | Nova nota
+                                
+
+                            //- EXEMPLOS DE NOTAS DE APLICAçÃO                        
+                            a(name="exemplos")
+                            tr
+                                td(style="width: 10%")
+                                    .info-label Exemplo(s) de Nota(s) de Aplicação:
+                                td
+                                    div(v-for="(note,index) in exAppNotes")
+                                        textarea(
+                                            cols="72"
+                                            lines="5"
+                                            v-model="exAppNotes[index]"
+                                        )
+                                        span.glyphicon.glyphicon-remove(
+                                            @click="exAppNotes.splice(index,1)"
+                                            style="padding-left: 5px; vertical-align:top"
+                                        )
+                                    
+                                    button(
+                                        style="margin-bottom:10px"
+                                        @click="exAppNotes.push('')"
+                                    )
+                                        | Novo exemplo
+
+
+                            //- NOTAS DE EXCLUSÃO                        
+                            a(name="notasE")
+                            tr
+                                td(style="width: 10%")
+                                    .info-label Nota(s) de Exclusão:
+                                td
+                                    div(v-for="(note,index) in delNotes")
+                                        textarea(
+                                            cols="72"
+                                            lines="5"
+                                            v-model="delNotes[index].Note"
+                                        )
+                                        span.glyphicon.glyphicon-remove(
+                                            @click="delNotes.splice(index,1)"
+                                            style="padding-left: 5px; vertical-align:top"
+                                        )
+                                    
+                                    button(
+                                        style="margin-bottom:10px"
+                                        @click="delNotes.push({id:'',Note:''})"
+                                    )
+                                        | Nova nota
+
+                            //- TERMOS DE ÍNDICE
+                            a(name="termosI")
+                            tr(v-if="type>=3")
+                                td(style="width: 10%")
+                                    .info-label Termos de Índice:
+                                td
+                                    div(v-for="(ti,index) in indexes")
+                                        input(
+                                            size="70    "
+                                            v-model="ti.Note"
+                                        )
+                                        span.glyphicon.glyphicon-remove(
+                                            @click="indexes.splice(index,1)"
+                                            style="padding-left: 5px; vertical-align:top"
+                                        )
+                                    
+                                    button(
+                                        style="margin-bottom:10px"
+                                        @click="indexes.push({id:'',Note:''})"
+                                    )
+                                        | Novo termo
+
+
+                    panel(header="Contexto de Avaliação" v-if="type>=3" is-open=true)
+                        table.consulta(style="border-color: white; border-style:solid; width:100%")
+                            //- TIPO/TRANSVERSAL
+                            a(name="tipoTrans")
+                            tr
+                                td(colspan=2)
+                                    table.noborder
+                                        //- TIPO DE PROCESSO
+                                        td(style="width: 50%")
+                                            table
+                                                td(style="width: 10%")
+                                                    .info-label Tipo de Processo: 
+                                                td
+                                                    input(
+                                                        type="radio"
+                                                        value="pc"
+                                                        v-model="procType"
+                                                    ) 
+                                                    |  Processo Comum
+                                                    br
+                                                    input(
+                                                        type="radio"
+                                                        value="pe"
+                                                        v-model="procType"
+                                                    )
+                                                    |  Processo Específico
+
+                                        //- PROCESSO TRANVERSAL
+                                        td(style="width: 50%")
+                                            table
+                                                td(style="width: 10%")
+                                                    .info-label Processo Transversal: 
+                                                td
+                                                    input(
+                                                        type="radio"
+                                                        value="S"
+                                                        v-model="procTrans"
+                                                    ) 
+                                                    |  Sim
+                                                    br
+                                                    input(
+                                                        type="radio"
+                                                        value="N"
+                                                        v-model="procTrans"
+                                                    )
+                                                    |  Não
+
+                            
+                            //- DONOS
+                            a(name="donos")
+                            tr(style="padding-bottom:30px")
+                                td(style="width: 10%")
+                                    .info-label Donos:
+
+                                td
+                                    custom-table-select(
+                                        v-if="orgsReady"
+
+                                        :header="orgsTableHeader"
+                                        :complete-rows="ownerList"
+                                        :ready="orgsReady"
+                                        :cwidth="orgsTableWidth"
+                                        
+                                        class-table='table table-condensed'
+
+                                        @select-clicked="orgSelected($event,selectedOwners,'dono')"
+                                    )
+                                    h4(
+                                        v-else
+                                    ) A carregar...
+
+
+                            //- PARTICIPANTES
+                            a(name="participantes")
+                            tr(v-if="type>=3 && procTrans=='S'")
+                                td(style="width: 10%")
+                                    .info-label Participante(s):
+                                    
+                                td
+                                    table
+                                        tr
+                                            tabs
+                                                tab(:header="partDic[key]" v-for="(key,index) in Object.keys(participantLists)" :key="index")
+                                                    custom-table-select(
+                                                        v-if="orgsReady && participantLists[key].length>0"
+
+                                                        :header="orgsTableHeader"
+                                                        :complete-rows="participantLists[key]"
+                                                        :ready="orgsReady"
+                                                        :cwidth="orgsTableWidth"
+                                                        
+                                                        class-table='table table-condensed'
+
+                                                        @select-clicked="orgSelected($event,participantsSelected[key], key)"
+                                                    )
+                                                    h4(
+                                                        v-else
+                                                    ) A carregar...
+                                        tr
+                                            td(colspan="3")
+                                                ul
+                                                    li(v-for="key in Object.keys(participantsSelected)" v-if="participantsSelected[key].length>0")
+                                                        b {{ partDic[key] }}
+                                                        ul
+                                                            li(v-for="(p, index) in participantsSelectedInfo[key]")
+                                                                | {{ p[1] }} - {{ p[2] }}
+                            
+
+                            //- PROCESSOS RELACIONADOS
+                            a(name="PNrel")
+                            tr
+                                td(style="width: 10%")
+                                    .info-label Processo(s) Relacionado(s):
+                                    
+                                td
+                                    custom-table-waterfall(
+                                        v-if="classesReady"
+
+                                        select-left="true"
+                                        pages-on="true"
+
+                                        :header="classesTableHeader"
+                                        :complete-rows="relationLists"
+                                        :cwidth="cwidth"
+                                        :n-edits="nEdits"
+
+                                        filter-on="true"
+                                        
+                                        table-class='table table-hover'
+                                        
+                                        @left-select-clicked="selectClicked($event)"
+                                    )
+                                    h4(
+                                        v-else
+                                    ) A carregar...
+                                    
+                                    div(v-if="relationsSelected.length>0")
+                                        .info-label(style="text-align:center;width:100%;margin-top:25px;margin-bottom:10px")
+                                            | Tipos de Relação
+                                        
+                                        table.noborder(style="margin-bottom:30px")
+                                            tr(
+                                                style="padding-bottom:5px"
+                                                v-for="pn in relationsSelected" 
+                                            )    
+                                                td(width="1px")
+                                                    select(v-model="pn.relType" @change="relChanged(index,pn)")
+                                                        option(v-for="rel in relationTypes" :value="rel.value")
+                                                            | {{rel.label}}
+                                                td(style="text-align:left")
+                                                    b(style="margin-left:5px")
+                                                        | {{pn.code}}
+                                                    |  - {{pn.name}}
+                                                                        
+
+                            //- LEGISLAÇÃO
+                            a(name="legislacao")
+                            tr(style="padding-bottom:30px")
+                                td(style="width: 10%")
+                                    .info-label Legislação:
+
+                                td
+                                    custom-table-select(
+                                        v-if="legsReady"
+
+                                        :header="legsTableHeader"
+                                        :complete-rows="legList"
+                                        :ready="legsReady"
+                                        :cwidth="legsTableWidth"
+                                        
+                                        class-table='table table-condensed'
+
+                                        @select-clicked="orgSelected($event,selectedLegs)"
+                                    )
+                                    h4(
+                                        v-else
+                                    ) A carregar...
+
+
+                    panel(header="Decisões de Avaliação" v-if="type>=3" is-open)
+                        table.consulta.noborder(style="border-color: white; border-style:solid")
+                            //- PRAZO DE CONSERVAÇÃO ADMINISTRATIVA
+                            a(name="PCA")
+                            tr
+                                td
+                                    .info-label(style="text-align:center")
+                                        | Prazo de Conservação Administrativa
+                            tr
+                                td
+                                    table.noborder
+                                        //- PRAZO / FORMA DE CONTAGEM
+                                        tr
+                                            td
+                                                .info-label Prazo:
+                                            td(width="10%")
+                                                input(
+                                                    size="15"
+                                                    v-model="pca.dueDate"
+                                                )
+                                            td(style="padding-left:10px")
+                                                .info-label Forma de Contagem:
+                                            td(v-if="countsReady")
+                                                v-select.custom-select(
+                                                    :options="countTypes"
+                                                    v-model="pca.count"
+                                                )        
+                                        //- SUB-FORMA DE CONTAGEM
+                                        tr(v-if="subcountsReady && pca.count.id=='vc_pcaFormaContagem_disposicaoLegal'")
+                                            td
+                                                .info-label Sub-forma de contagem:
+                                            td(colspan=3)
+                                                v-select.custom-select(
+                                                    :options="subcountTypes"
+                                                    v-model="pca.subcount"
+                                                ) 
+                                        //- JUSTIFICAÇÃO (CRITÉRIOS)
+                                        tr
+                                            td
+                                                .info-label Justificação:
+                                            td(colspan=3)
+                                                table.blackborder(v-for="(crit, index) in pca.criteria.list" style="width:100%")
+                                                    tr
+                                                        td
+                                                            v-select.custom-select.fixdisable(
+                                                                v-model="crit.type"
+                                                                :options="pca.criteria.types"
+                                                                @input="critTypeSelected(crit, 'pca', $event)"
+                                                            )
+                                                    tr
+                                                        td
+                                                            textarea(                    
+                                                                placeholder="Notas.."
+                                                                cols="72"
+                                                                lines="5"
+                                                                v-model="crit.content"
+                                                            )
+
+                                                    tr(v-if="crit.type && crit.type.rel>0 && crit.RelsReady")
+                                                        td(colspan=2)
+                                                            accordion.info-classe
+                                                                //- PROCESSOS
+                                                                panel(v-if="crit.type.rel>=1" header="Processos Relacionados")
+                                                                    custom-table-select(
+                                                                        v-if="crit.RelsReady && crit.type.rel==2"
+                                                                        
+                                                                        nosearch
+
+                                                                        :header='["#", "Código", "Título"]'
+                                                                        :complete-rows="crit.pnsToSelect"
+                                                                        :ready="crit.RelsReady"
+                                                                        :cwidth='["4%", "16%", "81%"]'
+                                                                        
+                                                                        class-table='table table-condensed'
+
+                                                                        @select-clicked="pnSelectedCrit($event,crit)"
+                                                                    )
+                                                                    h4(
+                                                                        v-else
+                                                                    ) A carregar...
+
+                                                                //- LEGISLAÇÃO
+                                                                panel(v-if="crit.type.rel==1" header="Legislação")
+                                                                    
+                                                                    custom-table-select(
+                                                                        v-if="crit.RelsReady && crit.type.rel==1"
+
+                                                                        :header='["#", "Tipo", "Número", "Título", "Data"]'
+                                                                        :complete-rows="crit.legToSelect"
+                                                                        :ready="crit.RelsReady"
+                                                                        :cwidth="['5%', '19%', '11%', '50%', '15%']"
+                                                                        
+                                                                        class-table='table table-condensed'
+
+                                                                        @select-clicked="legSelectedCrit($event,crit)"
+                                                                    )
+                                                                    h4(
+                                                                        v-else
+                                                                    ) A carregar...
+
+                                                    tr
+                                                        td
+                                                            button(@click="pca.criteria.list.splice(index,1)") 
+                                                                | Remover 
+                                                
+                                                button(@click="addNewJustCrit(pca.criteria.list)") Adicionar Critério
+
+                                                                                    
+                            //- DESTINO FINAL
+                            a(name="DF")
+                            tr
+                                td
+                                    .info-label(style="text-align:center") 
+                                        | Destino Final
+                            tr
+                                td
+                                    table.noborder
+                                        //- DESTINO
+                                        tr
+                                            td
+                                                .info-label Destino:
+                                            td(style="vertical-align:midle")
+                                                label(
+                                                    for="dfE"
+                                                    style="margin-right:5px;font-weight:normal"
+                                                ) Eliminação 
+                                                input#dfE(
+                                                    type="radio"
+                                                    value="E"
+                                                    v-model="df.end"
+                                                    style="margin-right:15px"
+                                                )  
+
+                                                label(
+                                                    for="dfC"
+                                                    style="margin-right:5px;font-weight:normal"
+                                                ) Conservação 
+                                                input#dfC(
+                                                    type="radio"
+                                                    value="C"
+                                                    v-model="df.end"
+                                                    style="margin-right:10px"
+                                                )  
+                                                
+                                                label(
+                                                    for="dfCP"
+                                                    style="margin-right:5px;font-weight:normal"
+                                                ) Conservação Parcial
+                                                input#dfCP(
+                                                    type="radio"
+                                                    value="CP"
+                                                    v-model="df.end"
+                                                )                                   
+                                        //- JUSTIFICAÇÃO (CRITÉRIOS)
+                                        tr
+                                            td
+                                                .info-label Justificação:
+                                            td(colspan=3)
+                                                table.blackborder(v-for="(crit, index) in df.criteria.list" style="width:100%")
+                                                    tr
+                                                        td
+                                                            v-select.custom-select.fixdisable(
+                                                                v-model="crit.type"
+                                                                :options="df.criteria.types"
+                                                                @input="critTypeSelected(crit, 'df', $event)"
+                                                            )
+                                                    tr
+                                                        td
+                                                            textarea(                    
+                                                                placeholder="Notas.."
+                                                                cols="72"
+                                                                lines="5"
+                                                                v-model="crit.content"
+                                                            )
+
+                                                    tr(v-if="crit.type && crit.type.rel>0 && crit.RelsReady")
+                                                        td(colspan=2)
+                                                            accordion.info-classe
+                                                                //- PROCESSOS
+                                                                panel(v-if="crit.type.rel>=1" header="Processos Relacionados")
+                                                                    custom-table-select(
+                                                                        v-if="crit.RelsReady && crit.type.rel==2"
+                                                                        
+                                                                        nosearch
+
+                                                                        :header='["#", "Código", "Título"]'
+                                                                        :complete-rows="crit.pnsToSelect"
+                                                                        :ready="crit.RelsReady"
+                                                                        :cwidth='["4%", "16%", "81%"]'
+                                                                        
+                                                                        class-table='table table-condensed'
+
+                                                                        @select-clicked="pnSelectedCrit($event,crit)"
+                                                                    )
+                                                                    h4(
+                                                                        v-else
+                                                                    ) A carregar...
+
+                                                                //- LEGISLAÇÃO
+                                                                panel(v-if="crit.type.rel==1" header="Legislação")
+                                                                    
+                                                                    custom-table-select(
+                                                                        v-if="crit.RelsReady && crit.type.rel==1"
+
+                                                                        :header='["#", "Tipo", "Número", "Título", "Data"]'
+                                                                        :complete-rows="crit.legToSelect"
+                                                                        :ready="crit.RelsReady"
+                                                                        :cwidth="['5%', '19%', '11%', '50%', '15%']"
+                                                                        
+                                                                        class-table='table table-condensed'
+
+                                                                        @select-clicked="legSelectedCrit($event,crit)"
+                                                                    )
+                                                                    h4(
+                                                                        v-else
+                                                                    ) A carregar...
+
+                                                    tr
+                                                        td
+                                                            button(@click="df.criteria.list.splice(index,1)") 
+                                                                | Remover 
+                                                
+                                                button(@click="addNewJustCrit(df.criteria.list)") Adicionar Critério
+                                        
+            
+            spinner(ref="spinner" fixed size="lg" text="Por favor aguarde...")
+
+            modal(
+                title="Atenção!" 
+                :value="modalMsgShow"
+                @closed="modalMsgShow=false"
+
+                small
+            ) 
+                .modal-body(slot="modal-body")
+                    center {{modalMsg}}
+                .modal-footer(slot="modal-footer")
+                    button(@click="modalMsgShow=false") Ok
+
+            input.btn.btn-xs.btn-default.col-sm-2(
+                type="button" 
+                @click="add" 
+                value="Adicionar" 
+                :disabled=`!(
+                    ((type>1 && parent) || type==1) && 
+                    code
+                )`
+             )
+            p.col-sm-7 {{ message }}
+    //-
+
+    
+
+append scripts    
+    script(src="/javascripts/classes/adicao.vue")

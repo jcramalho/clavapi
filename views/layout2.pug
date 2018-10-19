@@ -1,0 +1,171 @@
+extends ./_bootstrap
+append head
+	title CLAV 
+		if title
+			| - #{title}
+
+append styles
+	meta(name="author",content="José Carlos Ramalho")
+	link(rel="stylesheet", href="/stylesheets/bootstrap-theme.min.css")
+	link(href="/stylesheets/styles.css" rel="stylesheet" type="text/css")
+	link(href='/stylesheets/dashboard.css', rel='stylesheet')
+	link(href='/stylesheets/theme.css', rel='stylesheet')
+	link(href='/stylesheets/signin.css', rel='stylesheet')
+	link(href='/stylesheets/font-awesome.min.css', rel='stylesheet')
+	link(rel="icon" href="https://cdn1.iconfinder.com/data/icons/dotted-charts/512/links_diagram-128.png")
+	
+
+block body
+	.topbarfixoverlap
+		nav.navbar.navbar-inverse.navbar-default.navbar-static-top.nav-top-custom-style.customnav
+			.container-fluid
+				.navbar-header
+					if page=="index"
+						a(href="#" style="cursor:default").navbar-brand
+							span.glyphicon.glyphicon-home(style="color: white; padding-right:10px")
+							| CLAV – Plataforma para a Classificação e Avaliação da Informação Arquivística
+					else
+						a(href="/" data-toggle="tooltip" data-placement="bottom" title="Voltar à página inicial").navbar-brand
+							span.glyphicon.glyphicon-home(style="color: white; padding-right:10px")
+							| CLAV
+
+				//collapsable on mobile, fixed in desktop
+				#navbartop.navbar-collapse.collapse
+					if page!="index"
+						ul.nav.navbar-nav.navbar-left
+							//--------------------------------------------------------------------
+							
+							if user
+								li(v-for="linha in linhas" :style="linha.style")
+									a.dropdown-toggle(href='#', data-toggle='dropdown', role='button', aria-expanded='false' style="padding-left:7px;padding-right:7px")
+										| {{ linha.valor }} 
+										span.caret
+									ul.dropdown-menu(role="menu")
+										li
+											a(v-if="!linha.newCons" :href='linha.consultar') Consultar
+											a(v-else :href='linha.consultar') {{linha.newCons}}
+										li
+											a(v-if="!linha.newSub" :href='linha.submeter') Submeter
+											a(v-else :href='linha.submeter') {{linha.newSub}}
+								
+							else
+								li(v-for="(linha,index) in linhas" :style="linha.style")
+									a(:href="linha.consultar")
+										| {{linha.valor}}
+
+							//--------------------------------------------------------------------
+
+					ul.nav.navbar-nav.navbar-right
+						if user
+							li 
+								a(href='/users/perfil')
+									b(style="color: white") #{user.name} 
+									span.glyphicon.glyphicon-user(style="color: white")
+							li
+								a(:href="'/auth/logout?l='+location") Logout
+						else
+							li.dropdown
+								a.dropdown-toggle(href='#', data-toggle='dropdown', role='button', aria-expanded='false')
+									| Login 
+									span.caret
+								form.dropdown-menu(role='menu' action="/auth/login" method="post")
+									input#email.form-control(name='username' type='text', placeholder='Email', required='')
+									
+									input#password.form-control(name='password' type='password', placeholder='Password', required='')
+									
+									input(type="hidden" :value="location" name="location")
+
+									button.btn.btn-block(type='submit') Login
+							li
+								a(href='/users/registar') Registar
+
+				//collapsable, only appears on mobile		
+				#navbar.collapse
+		
+	.row
+		.container-fluid
+			.row
+				//does not appear on mobile
+				if sidebar
+					.col-sm-3.col-md-2.sidebar(style="padding-bottom:60px; position:absolute; height:100%")
+						div(style="position:absolute")
+							block lateral
+					
+					.col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main(style="position:absolute;padding-top:0; padding-bottom:70px; left:0px")
+						h3
+							if success_msg!=""
+								.alert.alert-success #{success_msg}
+
+							if warn_msg!=""
+								.alert.alert-warning #{warn_msg}
+							
+							if error_msg!=""
+								.alert.alert-danger #{error_msg}
+
+							if error!=""
+								.alert.alert-danger #{error}
+							
+						block corpo
+				
+				else
+					.col-lg-12.main(style="margin-left:30px; margin-right:30px; position:absolute; padding-top:0; padding-bottom:70px")
+						h3
+							if success_msg!=""
+								.alert.alert-success #{success_msg}
+
+							if warn_msg!=""
+								.alert.alert-warning #{warn_msg}
+							
+							if error_msg!=""
+								.alert.alert-danger #{error_msg}
+
+							if error!=""
+								.alert.alert-danger #{error}
+							
+						block corpo
+
+				#message
+					modal(
+						title="Atenção!" 
+						:value="modalMsgShow"
+						@closed="modalMsgShow=false"
+
+						small
+					) 
+						.modal-body(slot="modal-body")
+							center {{modalMsg}}
+						.modal-footer(slot="modal-footer")
+							button(@click="modalMsgShow=false") Ok
+
+block footer
+    nav.navbar.navbar-expand-lg.navbar-light.bg-light
+        .collapse.navbar-collapse
+            ul.navbar-nav.mr-auto
+                li.nav-item(active)
+                    a.nav-link(href="http://dglab.gov.pt/") DGLAB - Direção-Geral do Livro, dos Arquivos e das Bibliotecas 
+                li.nav-item
+                    a.nav-link(href="mailto:clav@dglab.gov.pt") Contactos
+                li.nav-item
+                    a.nav-link(href="#") + Informações
+                li.nav-item
+                    a.nav-link(href="#") Perguntas Frequentes
+                li.nav-item
+                    a.nav-link(href="#") Mapa do Site
+
+append scripts
+	script(src="/javascripts/base/vue.min.js")
+	script(src="/javascripts/base/vue-resource.js")
+	script(src="/javascripts/base/vue-select.js")
+	script(src="/javascripts/base/vue-strap.js")
+	
+	script(src="/javascripts/base/axios.min.js")
+	script(src="/javascripts/base/lodash.min.js")
+	
+	script(src="/javascripts/components.vue")
+	script(src="/javascripts/layout.vue")
+
+	|<script>
+	|	$(document).ready($(function () {
+	|		$('[data-toggle="tooltip"]').tooltip()
+	|	}))
+	|</script>

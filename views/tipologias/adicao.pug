@@ -1,0 +1,41 @@
+extends ../layout
+block corpo
+    #nova-entidade-form.panel.panel-default.panel-custom
+        .panel-heading
+            h1.page-header Nova Tipologia
+        .panel-body
+            .form-group 
+                table
+                    tr
+                        td(style="width:10%")
+                            label Designação: 
+                        td(style="width:80%")
+                            input(
+                                size="70"
+                                v-model="name"
+                            )
+                    tr
+                        td(style="padding-top:10px")
+                            label Sigla: 
+                        td
+                            input(
+                                size="70"
+                                v-model="initials"
+                            )
+
+
+            spinner(ref="spinner" fixed size="lg" text="Por favor aguarde...")
+
+            input.btn.btn-xs.btn-default.col-sm-2(
+                type="button" 
+                @click="add" 
+                value="Adicionar" 
+                :disabled="!(name && initials)"
+            )
+            p.col-sm-7 {{ message }}
+    //-
+
+    
+
+append scripts    
+    script(src="/javascripts/tipologias/adicao.vue")

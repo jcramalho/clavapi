@@ -1,0 +1,106 @@
+extends ../layout
+block corpo
+    #organizacao-form.panel.panel-default.panel-custom
+        .panel-heading
+            h1.page-header 
+                div {{ entName }}
+                    if user
+                        a(:href="'/entidades/editar/'+id" style="float:right")  
+                            span.glyphicon.glyphicon-edit
+        .panel-body
+            .form-group
+                table.consulta
+                    
+                    //- SIGLA
+                    tr
+                        td(style="width:10%")
+                            .info-label Sigla: 
+                        td(style="width:80%")
+                            | {{ entInitials }} 
+
+                    //- ESTADO
+                    tr
+                        td(style="width:10%")
+                            .info-label Estado: 
+                        td(style="width:80%")
+                            | {{ entEstado }}
+                    
+                    //- INTERNACIONAL
+                    tr
+                        td(style="width:10%")
+                            .info-label Internacional: 
+                        td(style="width:80%")
+                            | {{ entInternational }} 
+
+                    //- Fim da primeira secção
+                //- Segunda secção
+                //- TIPOLOGIAS A QUE PERTENCE
+                table.consulta(v-if="tipologiasReady")  
+                    tr
+                        td(style="width:100%")
+                            .info-label Pertence às tipologias de Entidade:
+                            table
+                                tr
+                                    td
+                                        ul(style="padding-left:20px")
+                                            li(v-for="o in tipologiasList")
+                                                a(:href="'/tipologias/consultar/'+o.id") {{ o.Sigla }} 
+                                                | - {{ o.Designacao }}
+                            // p(v-else) Não está associada a nenhuma Tipologia.
+                    //- Fim da segunda secção
+                //- Terceira secção            
+                //- Intervenção nos PN
+                table.consulta(v-if="domainReady || partsReady") 
+                    tr
+                        td(style="width:100%")
+                            .info-label Natureza de intervenção nos Processos de Negócio:
+                            table
+                                tr(v-if="domainReady")
+                                    td
+                                        label Como Dono:
+                                    td
+                                        ul(style="padding-left:20px" :class="{'is-collapsed' : domainCollapsed }")
+                                            li(v-for="c in domain")
+                                                a(:href="'/classes/consultar/'+c.id") {{ c.Code }}
+                                                | - {{ c.Title }}
+                                        a(@click="domainCollapsed=!domainCollapsed" v-if="domain.length>6").maozinha
+                                            span(v-if="domainCollapsed") Mostrar mais...
+                                            span(v-else) Mostrar menos...
+                
+                                tr(v-if="partsReady")
+                                    td
+                                        label Como Participante:    
+                                    td
+                                        ul(style="padding-left:20px")
+                                            li(v-for="key in Object.keys(participations)" v-if="participations[key].length>0")
+                                                b  {{ participationsDic[key] }}:
+                                                ul(:class="{'is-collapsed' : partsCollapsed[key] }")
+                                                    li(v-for="p in participations[key]")
+                                                        a(:href="'/classes/consultar/'+p.id") {{ p.Code }}
+                                                        |  - {{ p.Title }}
+                                                a(@click="partsCollapsed[key]=!partsCollapsed[key]" v-if="participations[key].length>6").maozinha
+                                                    span(v-if="partsCollapsed[key]") Mostrar mais...
+                                                    span(v-else) Mostrar menos...
+                            // p(v-else) Não tem nenhuma intervenção definida.
+                    //- Fim da terceira secção
+                //- Quarta secção            
+                //- Relações entre entidades
+                table.consulta(v-if="entRelsReady") 
+                    tr
+                        td(style="width:100%")
+                            .info-label Relações entre entidades:
+                            table
+                                tr
+                                    td
+                                        ul(style="padding-left:20px")
+                                            li(v-for="o in tipologiasList")
+                                                a(:href="'/tipologias/consultar/'+o.id") {{ o.Sigla }} 
+                                                | - {{ o.Designacao }}
+                            // p(v-else) Não tem relações com outras entidades.
+                //- Fim da quarta secção
+            if user
+                a(:href="'/entidades/editar/'+id").btn.btn-xs.btn-default.col-sm-1
+                    | Editar
+
+append scripts    
+    script(src="/javascripts/entidades/consulta.vue")

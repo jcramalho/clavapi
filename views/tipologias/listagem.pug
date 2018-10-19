@@ -1,0 +1,24 @@
+extends ../layout
+block corpo
+    h1.page-header Tipologias
+    .row
+        #tabela-tipologias.row.placeholders
+            custom-table-simple(
+                v-if="ready"
+
+                :header='["#","Designação","Sigla"]'
+                :complete-rows="tableData"
+                :ready="ready"
+                :cwidth="['4%','75%','21%']"
+                
+                class-table='table table-hover'
+
+                @row-clicked="rowClicked($event)"
+            )
+            h4(
+                v-else
+            ) A carregar...    
+    //-
+
+append scripts    
+    script(src="/javascripts/tipologias/listagem.vue")

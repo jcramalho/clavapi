@@ -1,0 +1,36 @@
+extends ../layout
+block corpo
+    .titlebox
+        | Gestão de Pedidos
+
+    #novos
+        hidden-table(
+            titulo="Novos Pedidos"
+            :cabecalho="cabecalho"
+            :linhas="linhas"
+        )
+
+    #apreciacao
+        hidden-table(
+            titulo="Pedidos em Apreciação Técnica"
+            :cabecalho="cabecalho"
+            :linhas="linhas"
+        )
+
+    #validacao
+        hidden-table(
+            titulo="Pedidos com validação técnica"
+            :cabecalho="cabecalho"
+            :linhas="linhas"
+        )
+
+    #autorizados
+        hidden-table(
+            titulo="Pedidos autorizados"
+            :cabecalho="cabecalho"
+            :linhas="linhas"
+        )
+
+
+append scripts    
+    script(src="/javascripts/admin/gestao_pedidos.vue")

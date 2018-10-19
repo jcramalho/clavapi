@@ -1,0 +1,101 @@
+extends ../layout
+block corpo
+    #nova-legislacao-form.panel.panel-default.panel-custom
+        .panel-heading
+            h3.page-header Novo Diploma
+        .panel-body
+            .form-group
+                table.consulta(style="border-color: white; border-style:solid; margin-bottom:20px")
+                    
+                    //- Tipo
+                    tr
+                        td(style="width: 10%")
+                            .info-label Tipo: 
+                        td(style="width:80%")
+                            input(
+                                size="50"
+                                v-model="diploma.Tipo"
+                            )
+                    
+                    //- Número
+                    tr
+                        td(style="width: 10%")
+                            .info-label Número: 
+                        td(style="width:80%")
+                            input(
+                                size="50"
+                                v-model="diploma.Numero"
+                                pattern="[0-9]+(\-\w)?/[0-9]+"
+                            )
+
+                    //- Entidades
+                    tr(style="padding-bottom:30px")
+                        td(style="width: 10%")
+                            .info-label Entidades:
+
+                        td
+                            accordion
+                                panel(type="white" header="Selecionar Entidades")
+                                    custom-table-select(
+                                        v-if="orgsReady"
+
+                                        :header="orgsTableHeader"
+                                        :complete-rows="orgs"
+                                        :ready="orgsReady"
+                                        :cwidth="orgsTableWidth"
+                                        
+                                        class-table='table table-condensed'
+
+                                        @select-clicked="orgSelected($event,diploma.Orgs)"
+                                    )
+                                    h4(
+                                        v-else
+                                    ) A carregar...
+                    //- Data
+                    tr
+                        td(style="width: 10%")
+                            .info-label Data: 
+                        td(style="width:80%")
+                            datepicker(
+                                value=""
+                                @input="dataEscolhida($event)"
+                                format="yyyy/MM/dd"
+                                placeholder="AAAA/MM/DD"
+                            )
+                    
+                    //- Sumário
+                    tr
+                        td(style="width: 10%")
+                            .info-label Sumário: 
+                        td(style="width:80%")
+                            input(
+                                size="50"
+                                v-model="diploma.Titulo"
+                            )
+       
+                    //- Link
+                    tr
+                        td(style="width: 10%")
+                            .info-label Link: 
+                        td(style="width:80%")
+                            input(
+                                size="50"
+                                v-model="diploma.Link"
+                            )
+
+            spinner(ref="spinner" size="lg" fixed text="Por favor aguarde...")
+            input.btn.btn-xs.btn-default.col-sm-1(
+                type="button" 
+                @click="add" 
+                value="Confirmar" 
+                :disabled="!readyToCreate()"
+
+                style="margin-right:10px"
+            )
+            div(v-html="message")
+
+    //-
+    
+
+append scripts    
+    script(src="/javascripts/leg/adicao.vue")

@@ -1,0 +1,60 @@
+extends ../layout
+block corpo
+    #legislacao-form.panel.panel-default.panel-custom
+        .panel-heading
+            h1.page-header 
+                div {{ legData.type.original }} {{ legData.org.label }} {{ legData.number.original }}
+                    if user
+                        a(:href="'/legislacao/editar/'+id" style="float:right")  
+                            span.glyphicon.glyphicon-edit 
+        .panel-body
+            .form-group
+                table(v-if="ready").consulta
+                    //- Data
+                    tr
+                        td(style="width:12%")
+                            .info-label {{ legData.date.label }}:
+                        
+                        td(style="width:80%")
+                            | {{ legData.date.original }}
+
+                    //- Sumário
+                    tr
+                        td(style="width:12%")
+                            .info-label {{ legData.title.label }}:
+                        
+                        td(style="width:80%")
+                            | {{ legData.title.original }}
+
+                    //- Link
+                    tr
+                        td(style="width:12%")
+                            .info-label {{ legData.link.label }}:
+                        
+                        td(style="width:80%")
+                            a(:href="legData.link.original" target="_blank") {{legData.link.original}}
+
+                    //- PROCESSOS
+                    tr
+                        td(style="width:10%")
+                            .info-label Regula os Processos de Negócio:
+                        td(style="width:80%")
+                            ul(v-if="processesReady" style="padding-left:20px" :class="{'is-collapsed' : processesCollapsed }")
+                                li(v-for="c in processes")
+                                    a(:href="'/classes/consultar/'+c.id") {{ c.Code }}
+                                    |  - {{ c.Title }}
+                            a(@click="processesCollapsed=!processesCollapsed" v-if="processes.length>6").maozinha
+                                span(v-if="processesCollapsed") Mostrar mais...
+                                span(v-else) Mostrar menos...
+                        
+                h3(v-else) A carregar...
+
+            if user
+                a(:href="'/legislacao/editar/'+id").btn.btn-xs.btn-default.col-sm-1
+                    | Editar
+    //-
+
+
+
+append scripts
+    script(src="/javascripts/leg/consulta.vue")

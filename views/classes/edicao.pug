@@ -1,0 +1,941 @@
+extends ../layout
+block corpo
+    #classe-form.panel.panel-default.panel-custom
+        .panel-heading
+            h3.page-header {{ clas.Code }} - {{ clas.Title }}  
+        .panel-body
+            .form-group
+                table.consulta(v-if="pageReady" style="border-color: white; border-style:solid; margin-bottom:20px")
+                    
+                    //- STATUS
+                    tr
+                        td(style="width: 10%")
+                            .info-label Estado: 
+
+                        td(style="width:80%" valign="center")
+                            | {{ clas.Status=="A" ? "Ativo" : (clas.Status=="H" ? "Harmonização" : "Inativo") }} 
+
+                    //- CLASSE PAI
+                    tr(v-if="clas.Level>1")
+                        td(style="width: 10%")
+                            .info-label Classe Pai: 
+                        td(style="width:80%")
+                            a(:href="'/classes/consultar/'+clas.Parent.id") {{ clas.Parent.code }}
+                            |  - {{ clas.Parent.title }}
+
+                    //- CLASSES DESCENDENTES
+                    tr(v-if="clas.Level<4 && clas.Children")
+                        td(style="width: 10%")
+                            .info-label Descendência: 
+                        td(style="width:80%")
+                            ul(style="padding-left:20px")
+                                li(v-for="child in clas.Children")
+                                    a(:href="'/classes/consultar/c'+child.Code")
+                                        | {{ child.Code }}
+                                    |  - {{ child.Title }}
+                    
+                    //- CÓDIGO
+                    tr 
+                        td(style="width: 10%")
+                            .info-label Código: 
+                        td(style="width:80%")
+                            | {{ clas.Code }}  
+
+                    //- TÍTULO
+                    tr
+                        td(style="width: 10%")
+                            .info-label Título: 
+                        td(v-if="edit.Title" style="width:80%")
+                            input(
+                                size="50"
+                                v-model="newClass.Title"
+                                :placeholder="clas.Title"
+                            )
+                        td(v-else style="width:80%")
+                            | {{ clas.Title }} 
+
+                        if user 
+                            td.editar
+                                label.maozinha(
+                                    for="titulo"
+                                    :class="[edit.Title ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                )
+                                input.drop-row(
+                                    id="titulo"
+                                    type="checkbox"
+                                    v-model="edit.Title"
+                                )
+
+                accordion.info-classe
+                    panel(header="Descritivo da Classe")
+                        table.consulta(v-if="pageReady" style="border-color: white; border-style:solid")                
+
+                            //- DESCRIÇÃO
+                            tr
+                                td(style="width: 10%")
+                                    .info-label Descrição: 
+                                td(v-if="edit.Desc" style="width:80%")
+                                    textarea(
+                                        cols="72"
+                                        lines="5"
+                                        v-model="newClass.Desc"
+                                    )
+                                td(v-else style="width:80%")
+                                    | {{ clas.Desc }} 
+
+                                if user 
+                                    td.editar
+                                        label.maozinha(
+                                            for="descricao"
+                                            :class="[edit.Desc ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                        )
+                                        input.drop-row(
+                                            id="descricao"
+                                            type="checkbox"
+                                            v-model="edit.Desc"
+                                        )
+
+                            //- NOTAS DE APLICAçÃO                        
+                            tr
+                                td(style="width: 10%")
+                                    .info-label Nota(s) de Aplicação:
+                                
+                                td(v-if="edit.AppNotes" style="width:80%")
+                                    div(v-for="(note,index) in newClass.AppNotes")
+                                        textarea(
+                                            cols="72"
+                                            lines="5"
+                                            v-model="note.Nota"
+                                        )
+                                        span.glyphicon.glyphicon-remove(
+                                            @click="newClass.AppNotes.splice(index,1)"
+                                            style="padding-left: 5px; vertical-align:top"
+                                        )
+                                    
+                                    button(
+                                        style="margin-bottom:10px"
+                                        @click="newClass.AppNotes.push({id:newNoteID(newClass.AppNotes, 'na'),Nota:''})"
+                                    )
+                                        | Nova nota
+                                
+                                td(v-else style="width:80%")
+                                    ul(style="padding-left:20px" v-if="appNotesReady")
+                                        li(v-for="note in clas.AppNotes")
+                                            | {{note.Nota}}
+                                
+                                if user
+                                    td.editar
+                                        label.maozinha(
+                                            for="notasA"
+                                            :class="[edit.AppNotes ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                        )
+                                        input.drop-row(
+                                            id="notasA"
+                                            type="checkbox"
+                                            v-model="edit.AppNotes"
+                                        )
+
+                            //- EXEMPLOS DE NOTAS DE APLICAçÃO                        
+                            tr
+                                td(style="width: 10%")
+                                    .info-label Exemplo(s) de Nota(s) de Aplicação:
+                                td(v-if="edit.ExAppNotes" style="width:80%")
+                                    div(v-for="(note,index) in newClass.ExAppNotes")
+                                        textarea(
+                                            cols="72"
+                                            lines="5"
+                                            v-model="note.Exemplo"
+                                        )
+                                        span.glyphicon.glyphicon-remove(
+                                            @click="newClass.ExAppNotes.splice(index,1)"
+                                            style="padding-left: 5px; vertical-align:top"
+                                        )
+
+                                    button(
+                                        style="margin-bottom:10px"
+                                        @click="newClass.ExAppNotes.push({Exemplo:''})"
+                                    )
+                                        | Novo exemplo
+                                td(v-else style="width:80%")
+                                    ul(style="padding-left:20px" v-if="exAppNotesReady")
+                                        li(v-for="note in clas.ExAppNotes")
+                                            | {{note.Exemplo}}
+
+                                if user
+                                    td.editar
+                                        label.maozinha(
+                                            for="notasEx"
+                                            :class="[edit.ExAppNotes ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                        )
+                                        input.drop-row(
+                                            id="notasEx"
+                                            type="checkbox"
+                                            v-model="edit.ExAppNotes"
+                                        )
+
+                            //- NOTAS DE EXCLUSÃO                        
+                            tr
+                                td(style="width: 10%")
+                                    .info-label Nota(s) de Exclusão:
+                                td(v-if="edit.DelNotes" style="width:80%")
+                                    div(v-for="(note,index) in newClass.DelNotes")
+                                        textarea(
+                                            cols="72"
+                                            lines="5"
+                                            v-model="note.Nota"
+                                        )
+                                        span.glyphicon.glyphicon-remove(
+                                            @click="newClass.DelNotes.splice(index,1)"
+                                            style="padding-left: 5px; vertical-align:top"
+                                        )
+                                    
+                                    button(
+                                        style="margin-bottom:10px"
+                                        @click="newClass.DelNotes.push({id:newNoteID(newClass.DelNotes, 'ne'),Nota:''})"
+                                    )
+                                        | Nova nota
+                                td(v-else style="width:80%")
+                                    ul(style="padding-left:20px" v-if="delNotesReady")
+                                        li(v-for="note in clas.DelNotes")
+                                            p(v-html="note.Nota")
+
+                                if user
+                                    td.editar
+                                        label.maozinha(
+                                            for="notasE"
+                                            :class="[edit.DelNotes ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                        )
+                                        input.drop-row(
+                                            id="notasE"
+                                            type="checkbox"
+                                            v-model="edit.DelNotes"
+                                        )
+
+                            //- TERMOS DE ÍNDICE
+                            tr(v-if="clas.Level>=3")
+                                td(style="width: 10%")
+                                    .info-label Termos de Índice:
+                                td(v-if="edit.Indexes" style="width:80%")
+                                    div(v-for="(ti,index) in newClass.Indexes")
+                                        textarea(
+                                            cols="72"
+                                            lines="5"
+                                            v-model="ti.Termo"
+                                        )
+                                        span.glyphicon.glyphicon-remove(
+                                            @click="newClass.Indexes.splice(index,1)"
+                                            style="padding-left: 5px; vertical-align:top"
+                                        )
+                                    
+                                    button(
+                                        style="margin-bottom:10px"
+                                        @click="newClass.Indexes.push({id:newNoteID(newClass.Indexes, 'ti'),Termo:''})"
+                                    )
+                                        | Novo termo de índice
+                                td(v-else style="width:80%")
+                                    ul(style="padding-left:20px")
+                                        li(v-for="index in clas.Indexes")
+                                            | {{ index.Termo }}
+
+                                if user
+                                    td.editar
+                                        label.maozinha(
+                                            for="tIndice"
+                                            :class="[edit.Indexes ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                        )
+                                        input.drop-row(
+                                            id="tIndice"
+                                            type="checkbox"
+                                            v-model="edit.Indexes"
+                                        )
+
+                    panel(header="Contexto de Avaliação" v-if="clas.Level>=3")
+                        table.consulta(v-if="pageReady" style="border-color: white; border-style:solid; width:100%")
+                            //- TIPO/TRANSVERSAL
+                            tr
+                                td(colspan=2)
+                                    table.noborder
+                                        //- TIPO DE PROCESSO
+                                        td(style="width: 50%")
+                                            table
+                                                td(style="width: 10%")
+                                                    .info-label Tipo de Processo: 
+                                                td(v-if="edit.ProcType" style="width:80%")
+                                                    input#pc(
+                                                        type="radio"
+                                                        value="pc"
+                                                        v-model="newClass.ProcType"
+                                                    ) 
+                                                    label(for="pc" style="font-weight:normal")
+                                                        |  Processo Comum
+                                                    br
+                                                    input#pe(
+                                                        type="radio"
+                                                        value="pe"
+                                                        v-model="newClass.ProcType"
+                                                    )
+                                                    label(for="pe" style="font-weight:normal")
+                                                        |  Processo Específico
+
+                                                td(v-else style="width:80%")
+                                                    | {{ clas.ProcType }}  
+
+                                                if user
+                                                    td(style="width:10%").editar
+                                                        label.maozinha(
+                                                            for="procTipo"
+                                                            :class="[edit.ProcType ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                                        )
+                                                        input.drop-row(
+                                                            id="procTipo"
+                                                            type="checkbox"
+                                                            v-model="edit.ProcType"
+                                                        )
+
+                                        //- PROCESSO TRANSVERSAL
+                                        td(style="width: 50%")
+                                            table
+                                                td(style="width: 10%")
+                                                    .info-label Processo Transversal: 
+                                                td(v-if="edit.ProcTrans" style="width:80%")
+                                                    input#ptS(
+                                                        type="radio"
+                                                        value="S"
+                                                        v-model="newClass.ProcTrans"
+                                                    ) 
+                                                    label(for="ptS" style="font-weight:normal")
+                                                        |  Sim
+                                                    br
+                                                    input#ptN(
+                                                        type="radio"
+                                                        value="N"
+                                                        v-model="newClass.ProcTrans"
+                                                    )
+                                                    label(for="ptN" style="font-weight:normal")
+                                                        |  Não
+                                                td(v-else style="width:80%")
+                                                    | {{ clas.ProcTrans=="S" ? "Sim" : "Não" }}  
+
+                                                if user
+                                                    td(style="width:10%").editar
+                                                        label.maozinha(
+                                                            for="procTrans"
+                                                            :class="[edit.ProcTrans ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                                        )
+                                                        input.drop-row(
+                                                            id="procTrans"
+                                                            type="checkbox"
+                                                            v-model="edit.ProcTrans"
+                                                        )
+
+                            //- DONOS
+                            tr
+                                td(style="width: 10%")
+                                    .info-label Donos:
+
+                                td(v-if="edit.Owners" style="width:80%")
+                                    custom-table-select(
+                                        v-if="orgsReady"
+
+                                        :header='["#", "Sigla", "Designação", "Tipo"]'
+                                        :complete-rows="orgList"
+                                        :ready="orgsReady"
+                                        :cwidth='["4%", "15%", "70%", "15%"]'
+                                        
+                                        class-table='table table-condensed'
+
+                                        @select-clicked="orgSelected($event,newClass.Owners,'dono')"
+                                    )
+                                    h4(
+                                        v-else
+                                    ) A carregar...
+
+                                td(v-else style="width:80%")
+                                    ul(v-if="ownersReady" style="padding-left:20px")
+                                        li(v-for="o in clas.Owners")
+                                            a(:href="o.id.startsWith('tip') ? '/tipologias/consultar/'+o.id : '/entidades/consultar/'+o.id") {{ o.Sigla }}
+                                            |  - {{ o.Designacao }}
+                                if user
+                                    td(style="width:10%").editar
+                                        label.maozinha(
+                                            for="donos"
+                                            :class="[edit.Owners ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                        )
+                                        input.drop-row(
+                                            id="donos"
+                                            type="checkbox"
+                                            v-model="edit.Owners"
+                                        )
+
+                            //- PARTICIPANTES
+                            tr(v-if="clas.ProcTrans=='S' || (edit.ProcTrans && newClass.ProcTrans=='S')")
+                                td(style="width: 10%")
+                                    .info-label Tipo de intervenção do(s) Participante(s):
+                                    
+                                td(v-if="edit.Participants" style="width:80%")
+                                    table
+                                        tr
+                                            tabs
+                                                tab(:header="participationsDic[key]" v-for="(key,index) in Object.keys(participantLists)" :key="index")
+                                                    custom-table-select(
+                                                        v-if="orgsReady"
+
+                                                        :header='["#", "Sigla", "Designação", "Tipo"]'
+                                                        :complete-rows="participantLists[key]"
+                                                        :ready="orgsReady"
+                                                        :cwidth='["4%", "15%", "70%", "15%"]'
+                                                        
+                                                        class-table='table table-condensed'
+
+                                                        @select-clicked="orgSelected($event,newClass.Participants[key], key)"
+                                                    )
+                                                    h4(
+                                                        v-else
+                                                    ) A carregar...
+                                        tr
+                                            td(colspan="3")
+                                                ul
+                                                    li(v-for="key in Object.keys(newClass.Participants)" v-if="newClass.Participants[key].length>0")
+                                                        b {{ participationsDic[key] }}
+                                                        ul
+                                                            li(v-for="(p, index) in newClass.Participants[key]")
+                                                                | {{ p.Sigla }} - {{ p.Designacao }}
+
+                                td(v-else style="width:80%")
+                                    ul(v-if="relProcsReady" style="padding-left:20px")
+                                        li(v-for="key in Object.keys(clas.Participants)" v-if="clas.Participants[key].length>0")
+                                            b {{participationsDic[key]}}:
+                                            ul
+                                                li(v-for="p in clas.Participants[key]")
+                                                    a(:href="p.id.startsWith('tip') ? '/tipologias/consultar/'+p.id : '/entidades/consultar/'+p.id") {{ p.Sigla }}
+                                                    |  - {{ p.Designacao }}
+                                if user
+                                    td(style="width:10%").editar
+                                        label.maozinha(
+                                            for="participantes"
+                                            :class="[edit.Participants ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                        )
+                                        input.drop-row(
+                                            id="participantes"
+                                            type="checkbox"
+                                            v-model="edit.Participants"
+                                        )
+
+                            //- PROCESSOS RELACIONADOS
+                            tr
+                                td(style="width: 10%")
+                                    .info-label Processo(s) Relacionado(s):
+                                    
+                                td(v-if="edit.RelProcs" style="width:80%")
+                                    custom-table-waterfall(
+                                        v-if="classesReady"
+
+                                        select-left="true"
+                                        pages-on="true"
+
+                                        :header='["Classe", "Título"]'
+                                        :complete-rows="classRelList"
+                                        :cwidth="['16%', '81%']"
+                                        :n-edits="nEdits"
+
+                                        filter-on="true"
+                                        
+                                        table-class='table table-hover'
+                                        
+                                        @left-select-clicked="pnRelSelected($event)"
+                                    )
+                                    h4(
+                                        v-else
+                                    ) A carregar...
+                                    
+                                    div(v-if="relationsSelected.length>0")
+                                        .info-label(style="text-align:center;width:100%;margin-top:25px;margin-bottom:10px")
+                                            | Tipos de Relação
+                                        
+                                        table.noborder(style="margin-bottom:30px")
+                                            tr(
+                                                style="padding-bottom:5px"
+                                                v-for="(pn,index) in relationsSelected" 
+                                            )    
+                                                td(width="1px")
+                                                    select(v-model="pn.relType" @change="relChanged(index,pn)")
+                                                        option( v-for="rel in relationTypes" :value="rel.value")
+                                                            | {{rel.label}}
+                                                td(style="text-align:left")
+                                                    b(style="margin-left:5px")
+                                                        | {{pn.code}}
+                                                    |  - {{pn.name}}
+                                td(v-else style="width:80%")
+                                    ul(v-if="relProcsReady" style="padding-left:20px")
+                                        li(v-for="key in Object.keys(clas.RelProcs)" v-if="clas.RelProcs[key].length>0")
+                                            b É {{ key }}
+                                            ul
+                                                li(v-for="c in clas.RelProcs[key]")
+                                                    a(:href="'/classes/consultar/'+c.id") {{ c.Code }}
+                                                    |  - {{ c.Title }}
+                                if user
+                                    td(style="width:10%").editar
+                                        label.maozinha(
+                                            for="relprocs"
+                                            :class="[edit.RelProcs ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                        )
+                                        input.drop-row(
+                                            id="relprocs"
+                                            type="checkbox"
+                                            v-model="edit.RelProcs"
+                                        )
+
+                            //- LEGISLAÇÃO
+                            tr
+                                td(style="width: 10%")
+                                    .info-label Legislação:
+                                td(v-if="edit.Legs" style="width:80%")
+                                    custom-table-select(
+                                        v-if="legListReady"
+
+                                        :header='["#", "Tipo", "Número", "Título", "Data"]'
+                                        :complete-rows="legList"
+                                        :ready="legListReady"
+                                        :cwidth="['5%', '19%', '11%', '50%', '15%']"
+                                        
+                                        class-table='table table-condensed'
+
+                                        @select-clicked="legSelected($event,newClass.Legs)"
+                                    )
+                                    h4(
+                                        v-else
+                                    ) A carregar...
+                                td(v-else style="width:80%")
+                                    ul(v-if="legsReady" style="padding-left:20px")
+                                        li(v-for="l in clas.Legs")
+                                            | {{ l.Tipo }} - 
+                                            a(:href="'/legislacao/consultar/'+l.id") {{ l.Número }} 
+                                            | - {{ l.Titulo }}
+                                if user
+                                    td(style="width:10%").editar
+                                        label.maozinha(
+                                            for="legislacao"
+                                            :class="[edit.Legs ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                        )
+                                        input.drop-row(
+                                            id="legislacao"
+                                            type="checkbox"
+                                            v-model="edit.Legs"
+                                        )
+
+                    panel(header="Decisões de Avaliação" v-if="clas.Level>=3")
+                        table.consulta.noborder(v-if="pageReady" style="border-color: white; border-style:solid")
+                            //- PRAZO DE CONSERVAÇÃO ADMINISTRATIVA
+                            tr(v-if="clas.PCA.valores.length")
+                                td
+                                    .info-label(style="text-align:center")
+                                        | Prazo de Conservação Administrativa
+                            tr(v-if="clas.PCA.valores.length")
+                                td
+                                    table.noborder
+                                        tr
+                                            td(width="125px")
+                                                .info-label Prazo:
+                                            td(v-if="!edit.PCA.value" style="width:150px")
+                                                | {{ clas.PCA.valores.join(', ') }}
+                                            td(v-else style="width:150px")
+                                                input(
+                                                    v-model="newClass.PCA.deadline"
+                                                )
+
+                                            if user
+                                                td.editar
+                                                    label.maozinha(
+                                                        for="pcaValor"
+                                                        :class="[edit.PCA.value ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                                    )
+                                                    input.drop-row(
+                                                        id="pcaValor"
+                                                        type="checkbox"
+                                                        v-model="edit.PCA.value"
+                                                    )
+
+                                            td(style="padding-left:10px" width="170px")
+                                                .info-label Forma de Contagem:
+                                            td(v-if="!edit.PCA.count")
+                                                | {{ clas.PCA.contagemnormalizada }}
+                                            td(v-else)
+                                                v-select.custom-select(
+                                                    :options="countTypes"
+                                                    v-model="newClass.PCA.count"
+                                                )  
+                                            if user
+                                                td.editar
+                                                    label.maozinha(
+                                                        for="pcaContagem"
+                                                        :class="[edit.PCA.count ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                                    )
+                                                    input.drop-row(
+                                                        id="pcaContagem"
+                                                        type="checkbox"
+                                                        v-model="edit.PCA.count"
+                                                    )
+                                                    
+                                        tr(v-if="clas.PCA.contagemnormalizada=='Conforme disposição legal' || (edit.PCA.count && newClass.PCA.count.id=='vc_pcaFormaContagem_disposicaoLegal')")
+                                            td
+                                                .info-label Sub-forma de Contagem:
+                                            td(v-if="!edit.PCA.count" colspan=5)
+                                                | {{ clas.PCA.subContagem }}
+                                            td(v-else colspan=5)
+                                                v-select.custom-select(
+                                                    :options="subcountTypes"
+                                                    v-model="newClass.PCA.subcount"
+                                                ) 
+                                        tr
+                                            td
+                                                .info-label Justificação:
+                                            if !user
+                                                td(colspan=5)
+                                                    table(v-for="(criterio,index) in clas.PCA.criterios")
+                                                        tr
+                                                            td
+                                                                b {{ criterio.tipo }}
+                                                        tr
+                                                            td 
+                                                                p(v-html="criterio.nota")
+                                            else 
+                                                td(colspan=4)
+                                                    div(v-if="!edit.PCA.just")
+                                                        table(v-for="crit in clas.PCA.criterios" style="width:100%")
+                                                            tr
+                                                                td
+                                                                    b {{ crit.tipo }}
+                                                            tr
+                                                                td
+                                                                    p(v-html="crit.nota")
+
+                                                    div(v-else)
+                                                        table.blackborder(v-for="(crit,index) in newClass.PCA.criteria" style="width:100%")
+                                                            tr
+                                                                td(v-if="!crit.edit")
+                                                                    b {{ crit.type.label }}
+                                                                td(v-else)
+                                                                    v-select.custom-select.fixdisable(
+                                                                        :disabled="crit.remove"
+                                                                        v-model="crit.type"
+                                                                        :options="PCA.critTypes"
+                                                                        @input="critTypeSelected(crit, $event)"
+                                                                    )
+
+                                                                td.editar(style="padding-right:5px" v-if="crit.original")
+                                                                    label.maozinha(
+                                                                        :for="'pcaCrit'+index"
+                                                                        :class="[crit.edit ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                                                    )
+                                                                    input.drop-row(
+                                                                        :id="'pcaCrit'+index"
+                                                                        type="checkbox"
+                                                                        v-model="crit.edit"
+                                                                    )
+                                                                td(v-else)
+                                                            tr
+                                                                td(v-if="!crit.edit" colspan=2)
+                                                                    p(v-html="crit.content")
+                                                                td(v-else colspan=2)
+                                                                    textarea(                                                                        
+                                                                        :disabled="crit.remove"
+                                                                        placeholder="Notas.."
+                                                                        cols="72"
+                                                                        lines="5"
+                                                                        v-model="crit.content"
+                                                                    )
+
+                                                            tr(v-if="crit.edit && crit.type.rel>0 && critRelsReady && !crit.remove")
+                                                                td(colspan=2)
+                                                                    accordion.info-classe
+                                                                        //- PROCESSOS
+                                                                        panel(v-if="crit.type.rel>=1" header="Processos Relacionados")
+                                                                            custom-table-select(
+                                                                                v-if="critRelsReady && crit.type.rel==2"
+                                                                                
+                                                                                nosearch
+
+                                                                                :header='["#", "Código", "Título"]'
+                                                                                :complete-rows="crit.pnsToSelect"
+                                                                                :ready="critRelsReady"
+                                                                                :cwidth='["4%", "16%", "81%"]'
+                                                                                
+                                                                                class-table='table table-condensed'
+
+                                                                                @select-clicked="pnSelectedCrit($event,crit)"
+                                                                            )
+                                                                            h4(
+                                                                                v-else
+                                                                            ) A carregar...
+
+                                                                        //- LEGISLAÇÃO
+                                                                        panel(v-if="crit.type.rel==1" header="Legislação")
+                                                                            
+                                                                            custom-table-select(
+                                                                                v-if="critRelsReady && crit.type.rel==1"
+
+                                                                                :header='["#", "Tipo", "Número", "Título", "Data"]'
+                                                                                :complete-rows="crit.legToSelect"
+                                                                                :ready="critRelsReady"
+                                                                                :cwidth="['5%', '19%', '11%', '50%', '15%']"
+                                                                                
+                                                                                class-table='table table-condensed'
+
+                                                                                @select-clicked="legSelectedCrit($event,crit)"
+                                                                            )
+                                                                            h4(
+                                                                                v-else
+                                                                            ) A carregar...
+
+                                                            tr(v-if="crit.edit")
+                                                                td(colspan=2)
+                                                                    button(v-if="!crit.remove" @click="crit.original ? crit.remove=true : newClass.PCA.criteria.splice(index,1)") 
+                                                                        | Remover 
+                                                                    button(v-else @click="crit.remove=false")
+                                                                        | Não remover
+
+                                                        button(@click="addNewCrit('PCA')") Adicionar Critério
+                                                                    
+                                                td.editar
+                                                    label.maozinha(
+                                                        for="pcaJustificação"
+                                                        :class="[edit.PCA.just ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                                    )
+                                                    input.drop-row(
+                                                        id="pcaJustificação"
+                                                        type="checkbox"
+                                                        v-model="edit.PCA.just"
+                                                    )
+                                
+                            //- DESTINO FINAL
+                            tr(v-if="clas.DF.valores.length")
+                                td
+                                    .info-label(style="text-align:center") 
+                                        | Destino Final
+                            tr(v-if="clas.DF.valores.length")
+                                td
+                                    table.noborder
+                                        tr
+                                            td(width="120px")
+                                                .info-label Destino:
+
+                                            td(v-if="!edit.DF.dest" colspan=4)
+                                                | {{ clas.DF.valores.join(', ') }} 
+
+                                            td(v-else style="vertical-align:midle" colspan=4)
+                                                label(
+                                                    for="dfE"
+                                                    style="margin-right:5px;font-weight:normal"
+                                                ) Eliminação 
+                                                input#dfE(
+                                                    type="radio"
+                                                    value="E"
+                                                    v-model="newClass.DF.dest"
+                                                    style="margin-right:15px"
+                                                )  
+
+                                                label(
+                                                    for="dfC"
+                                                    style="margin-right:5px;font-weight:normal"
+                                                ) Conservação 
+                                                input#dfC(
+                                                    type="radio"
+                                                    value="C"
+                                                    v-model="newClass.DF.dest"
+                                                    style="margin-right:10px"
+                                                )  
+                                                
+                                                label(
+                                                    for="dfCP"
+                                                    style="margin-right:5px;font-weight:normal"
+                                                ) Conservação Parcial
+                                                input#dfCP(
+                                                    type="radio"
+                                                    value="CP"
+                                                    v-model="newClass.DF.dest"
+                                                )  
+
+                                            if user
+                                                td.editar
+                                                    label.maozinha(
+                                                        for="dfDestino"
+                                                        :class="[edit.DF.dest ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                                    )
+                                                    input.drop-row(
+                                                        id="dfDestino"
+                                                        type="checkbox"
+                                                        v-model="edit.DF.dest"
+                                                    )                                           
+                                        tr
+                                            td
+                                                .info-label Justificação:
+                                            if !user
+                                                td(colspan=5)
+                                                    table(v-for="(criterio,index) in clas.DF.criterios")
+                                                        tr
+                                                            td
+                                                                b {{ criterio.tipo }}
+                                                        tr
+                                                            td 
+                                                                p(v-html="criterio.nota")
+                                            else
+                                                td(colspan=4)
+                                                    div(v-if="!edit.DF.just")
+                                                        table(v-for="crit in clas.DF.criterios" style="width:100%")
+                                                            tr
+                                                                td
+                                                                    b {{ crit.tipo }}
+                                                            tr
+                                                                td
+                                                                    p(v-html="crit.nota")
+
+                                                    div(v-else)
+                                                        table.blackborder(v-for="(crit,index) in newClass.DF.criteria" style="width:100%")
+                                                            tr
+                                                                td(v-if="!crit.edit")
+                                                                    b {{ crit.type.label }}
+                                                                td(v-else)
+                                                                    v-select.custom-select(
+                                                                        v-model="crit.type"
+                                                                        :options="DF.critTypes"
+                                                                        @input="critTypeSelected(crit, $event)"
+                                                                    )
+
+                                                                td.editar(style="padding-right:5px" v-if="crit.original")
+                                                                    label.maozinha(
+                                                                        :for="'dfCrit'+index"
+                                                                        :class="[crit.edit ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                                                    )
+                                                                    input.drop-row(
+                                                                        :id="'dfCrit'+index"
+                                                                        type="checkbox"
+                                                                        v-model="crit.edit"
+                                                                    )
+                                                                td(v-else)
+                                                            tr
+                                                                td(v-if="!crit.edit" colspan=2)
+                                                                    p(v-html="crit.content")
+                                                                td(v-else colspan=2)
+                                                                    textarea(
+                                                                        placeholder="Notas.."
+                                                                        cols="72"
+                                                                        lines="5"
+                                                                        v-model="crit.content"
+                                                                    )
+
+                                                            tr(v-if="crit.edit && crit.type.rel>0 && critRelsReady")
+                                                                td(colspan=2)
+                                                                    accordion.info-classe
+                                                                        //- PROCESSOS
+                                                                        panel(v-if="crit.type.rel>=1" header="Processos Relacionados")
+                                                                            custom-table-select(
+                                                                                v-if="critRelsReady && crit.type.rel==2"
+
+                                                                                :header='["#", "Código", "Título"]'
+                                                                                :complete-rows="crit.pnsToSelect"
+                                                                                :ready="critRelsReady"
+                                                                                :cwidth='["4%", "16%", "81%"]'
+                                                                                
+                                                                                class-table='table table-condensed'
+
+                                                                                @select-clicked="pnSelectedCrit($event,crit)"
+                                                                            )
+                                                                            h4(
+                                                                                v-else
+                                                                            ) A carregar...
+
+                                                                        //- LEGISLAÇÃO
+                                                                        panel(v-if="crit.type.rel==1" header="Legislação")
+                                                                            
+                                                                            custom-table-select(
+                                                                                v-if="critRelsReady && crit.type.rel==1"
+
+                                                                                :header='["#", "Tipo", "Número", "Título", "Data"]'
+                                                                                :complete-rows="crit.legToSelect"
+                                                                                :ready="critRelsReady"
+                                                                                :cwidth="['5%', '19%', '11%', '50%', '15%']"
+                                                                                
+                                                                                class-table='table table-condensed'
+
+                                                                                @select-clicked="legSelectedCrit($event,crit)"
+                                                                            )
+                                                                            h4(
+                                                                                v-else
+                                                                            ) A carregar...
+
+                                                            tr(v-if="crit.edit")
+                                                                td(colspan=2)
+                                                                    button(v-if="!crit.remove" @click="crit.original ? crit.remove=true : newClass.DF.criteria.splice(index,1)") 
+                                                                        | Remover 
+                                                                    button(v-else @click="crit.remove=false")
+                                                                        | Não remover
+                                                        
+                                                        button(@click="addNewCrit('DF')" style="margin-top:5px") Adicionar Critério
+                                                td.editar
+                                                    label.maozinha(
+                                                        for="dfJustificação"
+                                                        :class="[edit.DF.just ? 'glyphicon glyphicon-remove' : 'glyphicon glyphicon-edit']"
+                                                    )
+                                                    input.drop-row(
+                                                        id="dfJustificação"
+                                                        type="checkbox"
+                                                        v-model="edit.DF.just"
+                                                    )
+                                                             
+            //- Buttons
+            spinner(ref="spinner" size="lg" fixed text="Por favor aguarde...")
+
+            if user
+                input.btn.btn-xs.btn-default.col-sm-1(
+                    type="button" 
+                    @click="updateClass" 
+                    value="Confirmar" 
+                )
+                input.btn.btn-xs.btn-warning.col-sm-1(
+                    type="button" 
+                    @click="delConfirm=false" 
+                    value="Apagar" 
+                )
+                p.col-sm-5 {{ message }}
+
+                modal(
+                    title="Confirmar" 
+                    :value="delConfirm"
+                    @closed="delConfirm=false"
+
+                    small
+                ) 
+                    .modal-body(slot="modal-body")
+                        center Tem a certeza que deseja apagar?
+                    .modal-footer(slot="modal-footer")
+                        button(@click="deleteClass" style="margin-right:7px") Ok
+                        button(@click="delConfirm=false") Cancelar
+
+            //- input.btn.btn-xs.btn-danger(
+                    v-if="delConfirm"
+                    type="button" 
+                    @click="deleteClass" 
+                    value="OK" 
+                )
+                input.btn.btn-xs.btn-info(
+                    v-if="delConfirm"
+                    type="button" 
+                    @click="delNotReady" 
+                    value="<-" 
+                )
+
+            modal(
+                title="Atenção!" 
+                :value="modalMsgShow"
+                @closed="modalMsgShow=false"
+
+                small
+            ) 
+                .modal-body(slot="modal-body")
+                    center {{modalMsg}}
+                .modal-footer(slot="modal-footer")
+                    button(@click="modalMsgShow=false") Ok
+    //-
+
+append scripts    
+    script(src="/javascripts/classes/edicao.vue")

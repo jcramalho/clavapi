@@ -1,0 +1,28 @@
+{
+  "name": "M51-CLAV",
+  "version": "1.0.0",
+  "description": "Arquivo Digital: Plataforma Modular para a Classificação e a Avaliação da Informação Pública",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www"
+  },
+  "keywords": [
+    "vue.js",
+    "node.js",
+    "pug",
+    "sparql"
+  ],
+  "author": "Jos� Carlos Ramalho",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.1",
+    "express-session": "^1.15.6",
+    "express-validator": "^4.3.0",
+    "nodemon": "^1.18.4",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "sparql-client-2": "^0.6.2",
+    "swagger-ui-express": "^4.0.1"
+  }
+}
